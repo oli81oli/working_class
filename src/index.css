@@ -50,7 +50,7 @@ body {
 
 .formulario {
   display: flex;
-  background-color: #e61a30;
+  background-color: blue;
   text-transform: uppercase;
   border-radius: 2%;
   flex-direction: column;
