@@ -42,13 +42,18 @@ const ListEmploye = ({ selectedItem }) => {
 
     function empezarEditar(item) {
         setEditandoId(item.id)
-        setFormData(item)
+        setFormData({
+            ...item,
+            solucionado: item.solucionado ?? false
+        })
     }
 
     function handleChange(e) {
+        const { name, type, value, checked } = e.target
+
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value
+            [name]: type === 'checkbox' ? checked : value
         })
     }
 
@@ -76,7 +81,7 @@ const ListEmploye = ({ selectedItem }) => {
                             <tr>
                                 <th>Nombre</th>
                                 <th>Apellidos</th>
-                                <th>Teléfono</th>
+                                <th>Telefono</th>
                                 <th>Base</th>
                                 <th>Turno</th>
                                 <th>Delegado</th>
@@ -99,7 +104,15 @@ const ListEmploye = ({ selectedItem }) => {
                                             <td><input name='turno' value={formData.turno} onChange={handleChange} /></td>
                                             <td><input name='delegado' value={formData.delegado} onChange={handleChange} /></td>
                                             <td><input name='ayuda' value={formData.ayuda} onChange={handleChange} /></td>
-                                            <td><input name='solucionado' value={formData.solucionado} onChange={handleChange} /></td>
+                                            <td>
+                                                <input
+                                                    type='checkbox'
+                                                    name='solucionado'
+                                                    checked={formData.solucionado || false}
+                                                    onChange={handleChange} 
+                                                />
+                                                {formData.solucionado ? ' Si' : ' No'}  
+                                            </td>
 
                                             <td>
                                                 <button className='save' onClick={guardarCambios}>Guardar</button>

@@ -74,8 +74,9 @@ const Form = () => {
       <form className='formulario' onSubmit={handleSubmit}>
 
         <div className='campo'>
-          <label>Nombre</label>
+          <label for='nombre'>Nombre</label>
           <input
+            id='nombre'
             type='text'
             name='nombre'
             value={formData.nombre}
@@ -84,8 +85,9 @@ const Form = () => {
         </div>
 
         <div className='campo'>
-          <label>Apellidos</label>
+          <label for='apellidos'>Apellidos</label>
           <input
+            id='apellidos'
             type='text'
             name='apellidos'
             value={formData.apellidos}
@@ -94,8 +96,9 @@ const Form = () => {
         </div>
 
         <div className='campo'>
-          <label>Teléfono</label>
+          <label for='telefono'>Teléfono</label>
           <input
+            id='telefono'
             type='tel'
             name='telefono'
             value={formData.telefono}
@@ -104,8 +107,9 @@ const Form = () => {
         </div>
 
         <div className='campo'>
-          <label>Base</label>
+          <label for='base'>Base</label>
           <select
+            id='base'
             name='base'
             value={formData.base}
             onChange={handleChange}
@@ -121,8 +125,9 @@ const Form = () => {
         </div>
 
         <div className='campo'>
-          <label>Turno</label>
+          <label for='turno'>Turno</label>
           <input
+            id='turno'
             type='text'
             name='turno'
             value={formData.turno}
@@ -131,8 +136,9 @@ const Form = () => {
         </div>
 
         <div className='campo'>
-          <label>Delegado</label>
+          <label for='delegado'>Delegado</label>
           <input
+            id='delegado'
             type='text'
             name='delegado'
             value={formData.delegado}
@@ -141,8 +147,9 @@ const Form = () => {
         </div>
 
         <div className='campo'>
-          <label>Ayuda solicitada</label>
+          <label for='ayudaSolicitada'>Ayuda solicitada</label>
           <textarea
+            id='ayudaSolicitada'
             name='ayudaSolicitada'
             value={formData.ayudaSolicitada}
             onChange={handleChange}
@@ -150,8 +157,9 @@ const Form = () => {
         </div>
 
         <div className='campo-checkbox'>
-          <label>Solucionado</label>
+          <label for='solucionado'>Solucionado</label>
           <input
+            id='solucionado'
             type='checkbox'
             name='solucionado'
             checked={formData.solucionado}

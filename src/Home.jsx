@@ -31,7 +31,7 @@ const Home = ({ setSelectedItem }) => {
 
                 <div>
                     {show &&
-                        <select className='crear-select' value={opcion} onChange={handleChange}>
+                        <select id='base-selected' name='base-selected' className='crear-select' value={opcion} onChange={handleChange}>
                             <option value=''>-- elegir --</option>
                             <option value='Miravete'>Miravete</option>
                             <option value='San Epi'>San Epi</option>
