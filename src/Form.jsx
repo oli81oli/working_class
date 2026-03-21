@@ -3,10 +3,21 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from './assets/supabaseClient'
 
-const Form = () => {
+const BASES = [
+  'Miravete',
+  'San Epi',
+  'Ventas',
+  'Madrid Rio',
+  'Vaguada',
+  'Vistalegre'
+]
 
+const Form = () => {
   const [showToast, setShowToast] = useState(false)
+  const [errors, setErrors] = useState({})
+  const [supabaseError, setSupabaseError] = useState('') // <-- Para mostrar error de Supabase
   const navigate = useNavigate()
+
   const [formData, setFormData] = useState({
     nombre: '',
     apellidos: '',
@@ -20,61 +31,98 @@ const Form = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-
     setFormData({
       ...formData,
       [name]: type === 'checkbox' ? checked : value
     })
   }
 
+  const validate = () => {
+    const newErrors = {}
+    const requiredFields = [
+      'nombre',
+      'apellidos',
+      'telefono',
+      'base',
+      'turno',
+      'delegado',
+      'ayudaSolicitada'
+    ]
+
+    requiredFields.forEach((field) => {
+      if (!formData[field] || formData[field].toString().trim() === '') {
+        newErrors[field] = 'Rellena este campo'
+      }
+    })
+
+    // Validar teléfono solo números
+    if (formData.telefono && !/^\d+$/.test(formData.telefono)) {
+      newErrors.telefono = 'El teléfono debe contener solo números'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setSupabaseError('') // resetear error al enviar
 
-    const { data, error } = await supabase
-      .from('employe')
-      .insert([
-        {
-          nombre: formData.nombre,
-          apellidos: formData.apellidos,
-          telefono: formData.telefono,
-          base: formData.base,
-          turno: formData.turno,
-          delegado: formData.delegado,
-          ayuda: formData.ayudaSolicitada,
-          solucionado: formData.solucionado
-        }
-      ])
+    if (!validate()) return
 
-    if (error) {
-      console.log('Error:', error)
-    } else {
-      setShowToast(true)
+    try {
+      const { error } = await supabase
+        .from('employe')
+        .insert([
+          {
+            nombre: formData.nombre,
+            apellidos: formData.apellidos,
+            telefono: formData.telefono,
+            base: formData.base,
+            turno: formData.turno,
+            delegado: formData.delegado,
+            ayuda: formData.ayudaSolicitada,
+            solucionado: formData.solucionado
+          }
+        ])
 
-      setTimeout(() => {
-        setShowToast(false)
-        navigate('/')
-      }, 2500)
+      if (error) {
+        console.log('Error Supabase:', error)
+        setSupabaseError('No se pudo guardar la ficha. Intenta de nuevo.')
+      } else {
+        setShowToast(true)
+        setTimeout(() => {
+          setShowToast(false)
+          navigate('/')
+        }, 1500)
 
-      setFormData({
-        nombre: '',
-        apellidos: '',
-        telefono: '',
-        base: '',
-        turno: '',
-        delegado: '',
-        ayudaSolicitada: '',
-        solucionado: false
-      })
+        // Resetear formulario solo si no hay error
+        setFormData({
+          nombre: '',
+          apellidos: '',
+          telefono: '',
+          base: '',
+          turno: '',
+          delegado: '',
+          ayudaSolicitada: '',
+          solucionado: false
+        })
+        setErrors({})
+      }
+    } catch (err) {
+      console.log('Error inesperado:', err)
+      setSupabaseError('Ocurrió un error inesperado. Intenta más tarde.')
     }
   }
+
   const goBack = () => navigate('/')
 
   return (
     <div className='form-container'>
       <form className='formulario' onSubmit={handleSubmit}>
-
+        {/* Nombre */}
         <div className='campo'>
-          <label for='nombre'>Nombre</label>
+          <label htmlFor='nombre'>Nombre</label>
           <input
             id='nombre'
             type='text'
@@ -82,10 +130,12 @@ const Form = () => {
             value={formData.nombre}
             onChange={handleChange}
           />
+          {errors.nombre && <span className='error-text'>{errors.nombre}</span>}
         </div>
 
+        {/* Apellidos */}
         <div className='campo'>
-          <label for='apellidos'>Apellidos</label>
+          <label htmlFor='apellidos'>Apellidos</label>
           <input
             id='apellidos'
             type='text'
@@ -93,10 +143,12 @@ const Form = () => {
             value={formData.apellidos}
             onChange={handleChange}
           />
+          {errors.apellidos && <span className='error-text'>{errors.apellidos}</span>}
         </div>
 
+        {/* Teléfono */}
         <div className='campo'>
-          <label for='telefono'>Teléfono</label>
+          <label htmlFor='telefono'>Teléfono</label>
           <input
             id='telefono'
             type='tel'
@@ -104,10 +156,12 @@ const Form = () => {
             value={formData.telefono}
             onChange={handleChange}
           />
+          {errors.telefono && <span className='error-text'>{errors.telefono}</span>}
         </div>
 
+        {/* Base */}
         <div className='campo'>
-          <label for='base'>Base</label>
+          <label htmlFor='base'>Base</label>
           <select
             id='base'
             name='base'
@@ -115,17 +169,16 @@ const Form = () => {
             onChange={handleChange}
           >
             <option value=''>Selecciona base</option>
-            <option value='Miravete'>Miravete</option>
-            <option value='San Epi'>San Epi</option>
-            <option value='Ventas'>Ventas</option>
-            <option value='Madrid Rio'>Madrid Rio</option>
-            <option value='Vaguada'>Vaguada</option>
-            <option value='Vistalegre'>Vistalegre</option>
+            {BASES.map((b) => (
+              <option key={b} value={b}>{b}</option>
+            ))}
           </select>
+          {errors.base && <span className='error-text'>{errors.base}</span>}
         </div>
 
+        {/* Turno */}
         <div className='campo'>
-          <label for='turno'>Turno</label>
+          <label htmlFor='turno'>Turno</label>
           <input
             id='turno'
             type='text'
@@ -133,10 +186,12 @@ const Form = () => {
             value={formData.turno}
             onChange={handleChange}
           />
+          {errors.turno && <span className='error-text'>{errors.turno}</span>}
         </div>
 
+        {/* Delegado */}
         <div className='campo'>
-          <label for='delegado'>Delegado</label>
+          <label htmlFor='delegado'>Delegado</label>
           <input
             id='delegado'
             type='text'
@@ -144,20 +199,26 @@ const Form = () => {
             value={formData.delegado}
             onChange={handleChange}
           />
+          {errors.delegado && <span className='error-text'>{errors.delegado}</span>}
         </div>
 
+        {/* Ayuda */}
         <div className='campo'>
-          <label for='ayudaSolicitada'>Ayuda solicitada</label>
+          <label htmlFor='ayudaSolicitada'>Ayuda solicitada</label>
           <textarea
             id='ayudaSolicitada'
             name='ayudaSolicitada'
             value={formData.ayudaSolicitada}
             onChange={handleChange}
           />
+          {errors.ayudaSolicitada && (
+            <span className='error-text'>{errors.ayudaSolicitada}</span>
+          )}
         </div>
 
+        {/* Checkbox solucionado */}
         <div className='campo-checkbox'>
-          <label for='solucionado'>Solucionado</label>
+          <label htmlFor='solucionado'>Solucionado</label>
           <input
             id='solucionado'
             type='checkbox'
@@ -167,17 +228,18 @@ const Form = () => {
           />
         </div>
 
+        {/* Botones */}
         <div>
-          <button className='send-button' type='submit'>Enviar</button>
-          <button className='send-button' onClick={goBack}>Atras</button>
+          <button className='send-button' type='submit'>Guardar</button>
+          <button className='send-button' type='button' onClick={goBack}>Atras</button>
         </div>
 
+        {/* Mensaje de error de Supabase */}
+        {supabaseError && <div className='error-text' style={{ marginTop: '10px' }}>{supabaseError}</div>}
       </form>
-      {showToast && (
-        <div className='send-toast'>
-          Ficha guardada
-        </div>
-      )}
+
+      {/* Toast */}
+      {showToast && <div className='send-toast'>Ficha guardada</div>}
     </div>
   )
 }

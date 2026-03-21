@@ -4,10 +4,19 @@ import { supabase } from './assets/supabaseClient'
 import { useNavigate } from 'react-router-dom'
 import Loader from './Loader'
 
+//  BASES reutilizable
+const BASES = [
+    'Miravete',
+    'San Epi',
+    'Ventas',
+    'Madrid Rio',
+    'Vaguada',
+    'Vistalegre'
+]
 
 const ListEmploye = ({ selectedItem }) => {
 
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true)
     const [datos, setDatos] = useState([])
     const [editandoId, setEditandoId] = useState(null)
     const [formData, setFormData] = useState({})
@@ -30,19 +39,19 @@ const ListEmploye = ({ selectedItem }) => {
         }
         setLoading(false)
     }
-    
+
     const formatNumber = (phone) => {
-   if (typeof phone !== 'string' && typeof phone !== 'number') {
-        return '';
+        if (typeof phone !== 'string' && typeof phone !== 'number') {
+            return ''
+        }
+
+        let clean = phone.toString().replace(/\s+/g, '')
+
+        if (clean.startsWith('+34')) return clean
+        if (clean.startsWith('34')) return `+${clean}`
+
+        return `+34${clean}`
     }
-
-    let clean = phone.toString().replace(/\s+/g, '')
-
-    if (clean.startsWith('+34')) return clean
-    if (clean.startsWith('34')) return `+${clean}`
-
-    return `+34${clean}`
-}
 
     async function eliminarItem(id) {
         const { error } = await supabase
@@ -83,7 +92,9 @@ const ListEmploye = ({ selectedItem }) => {
             obtenerDatos()
         }
     }
+
     const goBack = () => navigate('/')
+
     return (
         <>
             <div>
@@ -125,10 +136,27 @@ const ListEmploye = ({ selectedItem }) => {
                                                             <td><input name='nombre' value={formData.nombre} onChange={handleChange} /></td>
                                                             <td><input name='apellidos' value={formData.apellidos} onChange={handleChange} /></td>
                                                             <td><input name='telefono' value={formData.telefono} onChange={handleChange} /></td>
-                                                            <td><input name='base' value={formData.base} onChange={handleChange} /></td>
+
+                                                            {/* 🔥 SELECT BASE */}
+                                                            <td>
+                                                                <select
+                                                                    name="base"
+                                                                    value={formData.base || ''}
+                                                                    onChange={handleChange}
+                                                                >
+                                                                    <option value="">Selecciona base</option>
+                                                                    {BASES.map((base) => (
+                                                                        <option key={base} value={base}>
+                                                                            {base}
+                                                                        </option>
+                                                                    ))}
+                                                                </select>
+                                                            </td>
+
                                                             <td><input name='turno' value={formData.turno} onChange={handleChange} /></td>
                                                             <td><input name='delegado' value={formData.delegado} onChange={handleChange} /></td>
                                                             <td><input name='ayuda' value={formData.ayuda} onChange={handleChange} /></td>
+
                                                             <td>
                                                                 <input
                                                                     type='checkbox'
@@ -138,28 +166,47 @@ const ListEmploye = ({ selectedItem }) => {
                                                                 />
                                                                 {formData.solucionado ? ' Si' : ' No'}
                                                             </td>
+
                                                             <td>
-                                                                <button className='save' onClick={guardarCambios}>Guardar</button>
+                                                                <button className='save' onClick={guardarCambios}>
+                                                                    Guardar
+                                                                </button>
                                                             </td>
                                                         </>
                                                     ) : (
                                                         <>
                                                             <td>{item.nombre}</td>
                                                             <td>{item.apellidos}</td>
+
                                                             <td>
-                                                                <a className='phone-number' href={`tel:${formatNumber(item.telefono)}`}>
+                                                                <a
+                                                                    className='phone-number'
+                                                                    href={`tel:${formatNumber(item.telefono)}`}
+                                                                >
                                                                     {item.telefono}
                                                                 </a>
-
                                                             </td>
+
                                                             <td>{item.base}</td>
                                                             <td>{item.turno}</td>
                                                             <td>{item.delegado}</td>
                                                             <td>{item.ayuda}</td>
                                                             <td>{item.solucionado ? 'Si' : 'No'}</td>
+
                                                             <td>
-                                                                <button className='edit-button' onClick={() => empezarEditar(item)}>Actualizar</button>
-                                                                <button className='edit-button' onClick={() => eliminarItem(item.id)}>Eliminar</button>
+                                                                <button
+                                                                    className='edit-button'
+                                                                    onClick={() => empezarEditar(item)}
+                                                                >
+                                                                    Actualizar
+                                                                </button>
+
+                                                                <button
+                                                                    className='edit-button'
+                                                                    onClick={() => eliminarItem(item.id)}
+                                                                >
+                                                                    Eliminar
+                                                                </button>
                                                             </td>
                                                         </>
                                                     )}
