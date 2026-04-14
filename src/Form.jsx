@@ -12,8 +12,8 @@ const BASES = [
   'Vistalegre'
 ]
 
-const Form = () => {
-  const [showToast, setShowToast] = useState(false)
+const Form = ({ setShowToast }) => {
+
   const [errors, setErrors] = useState({})
   const [supabaseError, setSupabaseError] = useState('') // <-- Para mostrar error de Supabase
   const navigate = useNavigate()
@@ -91,10 +91,7 @@ const Form = () => {
         setSupabaseError('No se pudo guardar la ficha. Intenta de nuevo.')
       } else {
         setShowToast(true)
-        setTimeout(() => {
-          setShowToast(false)
-          navigate('/')
-        }, 1500)
+        navigate('/')
 
         // Resetear formulario solo si no hay error
         setFormData({
@@ -238,8 +235,7 @@ const Form = () => {
         {supabaseError && <div className='error-text' style={{ marginTop: '10px' }}>{supabaseError}</div>}
       </form>
 
-      {/* Toast */}
-      {showToast && <div className='send-toast'>Ficha guardada</div>}
+
     </div>
   )
 }

@@ -10,12 +10,13 @@ import ListEmploye from './ListEmploye'
 function App() {
 
   const [selectedItem, setSelectedItem] = useState([])
+  const [showToast, setShowToast] = useState(true)
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/' element={<Home setSelectedItem={setSelectedItem} />} />
-        <Route path='/form' element={<Form />} />
+        <Route path='/' element={<Home setSelectedItem={setSelectedItem} showToast={showToast} setShowToast={setShowToast} />} />
+        <Route path='/form' element={<Form setShowToast={setShowToast} />} />
         <Route path='/list' element={<ListEmploye selectedItem={selectedItem} />} />
       </Routes>
     </BrowserRouter>

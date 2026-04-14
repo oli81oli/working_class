@@ -95,10 +95,12 @@ const ListEmploye = ({ selectedItem }) => {
 
     const goBack = () => navigate('/')
 
+    console.log(datos.length)
     return (
         <>
             <div>
                 <h2>Listado</h2>
+                {datos && <h3>{datos.filter((item) => item.base === selectedItem).length} conductor@s</h3>}
                 <button onClick={goBack} className='back'>Atras</button>
 
                 <div className='tabla-container'>
