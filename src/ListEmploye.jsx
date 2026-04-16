@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './assets/supabaseClient'
 import { useNavigate } from 'react-router-dom'
 import Loader from './Loader'
+import WhatsAppButton from './WhatsappButton'
 
 //  BASES reutilizable
 const BASES = [
@@ -21,6 +22,12 @@ const ListEmploye = ({ selectedItem }) => {
     const [editandoId, setEditandoId] = useState(null)
     const [formData, setFormData] = useState({})
     const navigate = useNavigate()
+
+    // 🔥 NUEVO: estado global de orden
+    const [orden, setOrden] = useState({
+        campo: null, // 'nombre' | 'delegado' | 'ayuda' | 'solucionado'
+        direccion: 'none' // 'asc' | 'desc' | 'none'
+    })
 
     useEffect(() => {
         obtenerDatos()
@@ -95,7 +102,23 @@ const ListEmploye = ({ selectedItem }) => {
 
     const goBack = () => navigate('/')
 
-    console.log(datos.length)
+    // 🔥 CLICK EN COLUMNA
+    function toggleOrden(campo) {
+        if (orden.campo !== campo) {
+            setOrden({ campo, direccion: 'asc' })
+        } else {
+            if (orden.direccion === 'none') setOrden({ campo, direccion: 'asc' })
+            else if (orden.direccion === 'asc') setOrden({ campo, direccion: 'desc' })
+            else setOrden({ campo: null, direccion: 'none' })
+        }
+    }
+
+    // 🔥 ICONOS
+    const getIcon = (campo) => {
+        if (orden.campo !== campo) return '🔽' // 👈 visible por defecto
+        return orden.direccion === 'asc' ? '🔼' : '🔽'
+    }
+
     return (
         <>
             <div>
@@ -109,14 +132,27 @@ const ListEmploye = ({ selectedItem }) => {
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Nombre</th>
+                                        <th onClick={() => toggleOrden('nombre')} style={{ cursor: 'pointer' }}>
+                                            Nombre{getIcon('nombre')}
+                                        </th>
+
                                         <th>Apellidos</th>
                                         <th>Telefono</th>
                                         <th>Base</th>
                                         <th>Turno</th>
-                                        <th>Delegado</th>
-                                        <th>Ayuda</th>
-                                        <th>Solucionado</th>
+
+                                        <th onClick={() => toggleOrden('delegado')} style={{ cursor: 'pointer' }}>
+                                            Delegado{getIcon('delegado')}
+                                        </th>
+
+                                        <th onClick={() => toggleOrden('ayuda')} style={{ cursor: 'pointer' }}>
+                                            Ayuda{getIcon('ayuda')}
+                                        </th>
+
+                                        <th onClick={() => toggleOrden('solucionado')} style={{ cursor: 'pointer' }}>
+                                            Solucionado{getIcon('solucionado')}
+                                        </th>
+
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
@@ -129,8 +165,27 @@ const ListEmploye = ({ selectedItem }) => {
                                             </td>
                                         </tr>
                                     ) : (
-                                        datos
+                                        [...datos]
                                             .filter((item) => item.base === selectedItem)
+                                            .sort((a, b) => {
+                                                if (orden.direccion === 'none' || !orden.campo) return 0
+
+                                                let valA = a[orden.campo]
+                                                let valB = b[orden.campo]
+
+                                                // boolean → convertir a texto
+                                                if (orden.campo === 'solucionado') {
+                                                    valA = valA ? 'Si' : 'No'
+                                                    valB = valB ? 'Si' : 'No'
+                                                }
+
+                                                valA = valA || ''
+                                                valB = valB || ''
+
+                                                const resultado = valA.toString().localeCompare(valB.toString(), 'es', { sensitivity: 'base' })
+
+                                                return orden.direccion === 'asc' ? resultado : -resultado
+                                            })
                                             .map((item) => (
                                                 <tr key={item.id}>
                                                     {editandoId === item.id ? (
@@ -139,7 +194,6 @@ const ListEmploye = ({ selectedItem }) => {
                                                             <td><input name='apellidos' value={formData.apellidos} onChange={handleChange} /></td>
                                                             <td><input name='telefono' value={formData.telefono} onChange={handleChange} /></td>
 
-                                                            {/* 🔥 SELECT BASE */}
                                                             <td>
                                                                 <select
                                                                     name="base"
@@ -180,13 +234,17 @@ const ListEmploye = ({ selectedItem }) => {
                                                             <td>{item.nombre}</td>
                                                             <td>{item.apellidos}</td>
 
-                                                            <td>
-                                                                <a
-                                                                    className='phone-number'
-                                                                    href={`tel:${formatNumber(item.telefono)}`}
-                                                                >
-                                                                    {item.telefono}
-                                                                </a>
+                                                            <td className='phone-item'>
+                                                                <div className='box-phone'>
+                                                                    <a
+                                                                        className='phone-number'
+                                                                        href={`tel:${formatNumber(item.telefono)}`}
+                                                                    >
+                                                                        {item.telefono}
+                                                                    </a>
+
+                                                                    <WhatsAppButton phone={item.telefono} />
+                                                                </div>
                                                             </td>
 
                                                             <td>{item.base}</td>
